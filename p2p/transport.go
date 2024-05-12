@@ -1,7 +1,7 @@
 package p2p
 
 // Peer is an interface that represents the remote node
-// It creates a remote connection between two devices to transfer the data
+// When some one create a node
 type Peer interface{}
 
 // Transport is an interface that handles the communication
