@@ -1,10 +1,12 @@
 package p2p
 
 import (
+	"fmt"
 	"net"
 	"sync"
 
 	"github.com/dev-hack95/localstorage/utilities/logs"
+	"github.com/spf13/cast"
 )
 
 type TCPTransportsOpts struct {
@@ -60,7 +62,7 @@ func NewTCPTransport(opts TCPTransportsOpts) *TCPTransport {
 func (t *TCPTransport) ListenAndAccept() (err error) {
 	// Listen will listen on given addrress via tcp protocol
 	// Returns listener
-	//	var err error
+	// var err error
 	// A methods which is assocaited with TCPTransport struct
 	// We are passing network() which is either tcp or udp and string() which is address of new node
 	t.listener, err = net.Listen("tcp", t.ListenAddr)
@@ -93,12 +95,10 @@ func (t *TCPTransport) startAcceptLoop() {
 }
 
 func (t *TCPTransport) handleConnection(conn net.Conn) {
-
 	peer := NewTCPPeer(conn, true)
 	// Create a new tcp peer node
 
-	_ = peer
-
+	// Create a handshake between two peer
 	if err := t.HandshakeFunc(conn); err != nil {
 		logs.Error("Tcp handshake error: ", err.Error())
 		conn.Close()
@@ -109,12 +109,15 @@ func (t *TCPTransport) handleConnection(conn net.Conn) {
 
 	msg := &Message{}
 
+	// buffer := make([]byte, 2000)
+
 	for {
 		// Decode message coming from connection
 		if err := t.Decoder.Decode(conn, msg); err != nil {
 			logs.Error("Decoder error: ", err.Error())
 			continue
 		}
+		msg.Form = conn.RemoteAddr()
+		fmt.Print("User: ", msg.Form, " Message: "+cast.ToString(msg.Payload))
 	}
-
 }
